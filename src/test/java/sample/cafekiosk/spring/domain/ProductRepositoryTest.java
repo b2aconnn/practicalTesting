@@ -17,7 +17,12 @@ import static sample.cafekiosk.spring.domain.product.ProductType.HANDMADE;
 
 @ActiveProfiles("test")
 //@SpringBootTest
-@DataJpaTest // JPA 관련된 빈들만 주입을 해줌.
+
+/**
+ * JPA 관련된 빈들만 주입을 해줌.
+ * @SpringBootTest 와 다르게 @DataJpaTest에는 @Transactional이 선언되어 있어 rollback이 되어서 따로 db 데이터를 clear 해줄 필요가 없다.
+ */
+@DataJpaTest
 class ProductRepositoryTest {
     @Autowired
     private ProductRepository productRepository;

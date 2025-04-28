@@ -11,6 +11,8 @@ import sample.cafekiosk.spring.domain.product.ProductRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -20,13 +22,26 @@ public class OrderService {
 
     public OrderResponse createOrder(OrderCreateRequest request, LocalDateTime registeredDateTime) {
         List<String> productNumbers = request.getProductNumbers();
-        // Product
-        List<Product> products = productRepository.findAllByProductNumberIn(productNumbers);
+
+        List<Product> duplicateProducts = findByProductsBy(productNumbers);
 
         // Order
-        Order order = Order.create(products, registeredDateTime);
+        Order order = Order.create(duplicateProducts, registeredDateTime);
         Order savedOrder = orderRepository.save(order);
 
         return OrderResponse.of(savedOrder);
+    }
+
+    private List<Product> findByProductsBy(List<String> productNumbers) {
+        // Product
+        List<Product> products = productRepository.findAllByProductNumberIn(productNumbers);
+
+        Map<String, Product> productMap = products.stream()
+                .collect(Collectors.toMap(Product::getProductNumber, product -> product));
+
+        List<Product> duplicateProducts = productNumbers.stream()
+                .map(productMap::get)
+                .collect(Collectors.toList());
+        return duplicateProducts;
     }
 }
